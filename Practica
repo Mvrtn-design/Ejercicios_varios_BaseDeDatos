@@ -1,0 +1,151 @@
+CREATE TABLE RADIO (
+nombre      VARCHAR2 (20) PRIMARY KEY,
+direccion   VARCHAR2 (20),
+web         CHAR (20),
+email       CHAR (20),
+telefono    NUMBER (9));
+
+CREATE TABLE ESTUDIO(
+nombreEstudio   VARCHAR2(20) PRIMARY KEY,
+direccion       VARCHAR2(20),
+telefono        NUMBER(9),
+pais            VARCHAR2(20));
+
+CREATE TABLE DISCOGRAFICA (
+nombre      VARCHAR2(20) PRIMARY KEY,
+telefono    NUMBER (9),
+direccion   VARCHAR2(30),
+pais        VARCHAR2(20) );
+
+CREATE TABLE EMPRESAGRAFICA (
+nombre      VARCHAR2(20) PRIMARY KEY,
+direccion   VARCHAR2 (20),
+pais        VARCHAR2(20) );
+
+CREATE TABLE GRUPO (
+nombre          VARCHAR2 (20) PRIMARY KEY,
+anyoFundacion   DATE,
+pais            VARCHAR2(20) NOT NULL );
+
+ALTER TABLE GRUPO MODIFY anyoFundacion NUMBER (4);
+
+CREATE TABLE VINILO (
+ISVN            CHAR(20) PRIMARY KEY,
+discografica    VARCHAR2(20), FOREIGN KEY (discografica) REFERENCES DISCOGRAFICA (nombre),
+fechaLanz       DATE,
+copiasVendidas  NUMBER(10),
+grupo           VARCHAR2(20), FOREIGN KEY (grupo) REFERENCES GRUPO (nombre),
+empresaGrafica  VARCHAR2(20), FOREIGN KEY (empresaGrafica) REFERENCES EMPRESAGRAFICA (nombre));
+
+CREATE TABLE LP (
+ISVN                CHAR(20) PRIMARY KEY, FOREIGN KEY (ISVN) REFERENCES VINILO (ISVN),
+titulo              VARCHAR2(20),
+copiasLanzamiento   NUMBER(9));
+
+
+CREATE TABLE SINGLE ( 
+ISVN    CHAR(20) PRIMARY KEY , FOREIGN KEY (ISVN) REFERENCES VINILO (ISVN),
+ISVNLP  CHAR(20), FOREIGN KEY (ISVNLP) REFERENCES LP (ISVN) );
+
+CREATE TABLE RANKING (
+anyo NUMBER (4),
+semana NUMBER (2),
+CONSTRAINT Doble_Pri PRIMARY KEY (anyo,semana),
+primero CHAR (20), FOREIGN KEY (primero) REFERENCES SINGLE (ISVN),
+segundo CHAR (20), FOREIGN KEY (segundo) REFERENCES SINGLE (ISVN),
+tercero CHAR (20), FOREIGN KEY (tercero) REFERENCES SINGLE (ISVN));
+
+
+CREATE TABLE TEMA (
+codigo          CHAR (10) PRIMARY KEY,
+titulo          VARCHAR2 (20),
+duracion        NUMBER(4),
+autor           VARCHAR2 (20),
+estudio         VARCHAR2 (20) NOT NULL,   FOREIGN KEY (estudio) REFERENCES ESTUDIO (nombreEstudio),
+LP              CHAR (20), FOREIGN KEY (LP) REFERENCES LP (ISVN),
+cara_LP         CHAR (1),
+pista_LP        NUMBER (2),
+single          CHAR (20) NOT NULL, FOREIGN KEY (single) REFERENCES SINGLE (ISVN),
+cara_single     CHAR (1) NOT NULL,
+pista_single    NUMBER (2) NOT NULL );
+
+CREATE TABLE EMISION (
+radio       VARCHAR2(20), FOREIGN KEY (radio) REFERENCES RADIO (nombre),
+fechaHora   DATE UNIQUE NOT NULL ,
+tema        VARCHAR2 (10),
+CONSTRAINT Dos_Pri PRIMARY KEY (radio,fechaHora) );
+
+--AÑADIENDO FILAS
+
+INSERT INTO RADIO VALUES ('Europa FM','calle San Jose', 'europafm.es', 'europafm@hotmail.com',614230568);
+INSERT INTO RADIO VALUES ('Los Santos FM' , 'calle la Puerta', 'losfuckingsantos.com','lossantosfm@gtav.com',666898741);
+INSERT INTO RADIO VALUES ('Cadena 100' ,'Gran Via' , 'cadena100radio.es','ca100@cope.es',654723899);
+INSERT INTO ESTUDIO VALUES ('After Mate' , 'calle las vegas' , 648112844 ,'Francia');
+INSERT INTO ESTUDIO VALUES ('Interscope' , 'fifth avenue' , 639588741 , 'Italia');
+INSERT INTO ESTUDIO VALUES ('La Casa REC' , 'Dos de Mayo', 684235856 , 'España');
+INSERT INTO DISCOGRAFICA VALUES ('Cactus Jack', 582168418 , 'Wall street' , 'EE.UU');
+INSERT INTO DISCOGRAFICA VALUES ('We the Best', 185385586 , 'Bamfort Road' , 'Jamaica');
+INSERT INTO DISCOGRAFICA VALUES ('GTB' ,345892458, 'Calle de las flores' , 'España');
+INSERT INTO EMPRESAGRAFICA VALUES ('PicsArt' , 'houdston street' , 'EE.UU');
+INSERT INTO EMPRESAGRAFICA VALUES ('Stindl', 'Krakenhausen Streten' , ' Alemania');
+INSERT INTO EMPRESAGRAFICA VALUES ('Alpino', 'calle Granidona', 'España');
+INSERT INTO GRUPO VALUES ('YMCMB', 1997, 'EE.UU');
+INSERT INTO GRUPO VALUES ('QUEEN',2001, 'Corea del Sur');
+INSERT INTO GRUPO VALUES ('Black Eyes Peas' , 1990 ,'EEUU' );
+INSERT INTO VINILO VALUES ('AA00/475328','We the Best',to_date('23/10/2009','DD/MM/YYYY'),200,'YMCMB','PicsArt');
+INSERT INTO VINILO (ISVN,grupo,empresaGrafica) VALUES ('AA00/76568','YMCMB','Stindl');
+INSERT INTO VINILO VALUES ('AA00/32452','We the Best',to_date('1/12','MM/YY'),3000,'Black Eyes Peas','Alpino');
+
+INSERT INTO VINILO VALUES ('ALBUM00/475328','We the Best',to_date('23/10/2009','DD/MM/YYYY'),78200,'YMCMB','PicsArt');
+INSERT INTO VINILO (ISVN,grupo,empresaGrafica) VALUES ('ALBUM00/76568','YMCMB','Stindl');
+INSERT INTO VINILO VALUES ('ALBUM00/32452','We the Best',to_date('1/12','MM/YY'),129000,'Black Eyes Peas','Alpino');
+
+INSERT INTO LP VALUES ('AA00/475328','Grecce','64000');
+INSERT INTO LP VALUES ('AA00/76568','Mamacita',767000);
+INSERT INTO LP VALUES ('AA00/32452','No more',4000000);
+INSERT INTO SINGLE VALUES ('AA00/475328','AA00/76568');
+INSERT INTO SINGLE VALUES ('AA00/76568','AA00/76568');
+INSERT INTO SINGLE VALUES ('AA00/32452','AA00/32452');
+INSERT INTO RANKING VALUES (2014,5,'AA00/32452','AA00/76568','AA00/475328');
+INSERT INTO RANKING VALUES (2008,5,'AA00/76568','AA00/32452','AA00/475328');
+INSERT INTO RANKING VALUES (2018,21,'AA00/76568','AA00/475328','AA00/32452');
+INSERT INTO TEMA VALUES ('0_34_0','CORONAMOS','33','Snoop Class','After Mate','AA00/76568','A',07,'AA00/76568','B',5);
+INSERT INTO TEMA VALUES ('0_4545_0','A++ ft DJ Profe','21','Artista MC','Interscope','AA00/32452','B',012,'AA00/32452','A',2);
+INSERT INTO TEMA VALUES ('0_95865_0','Memories Degree','303','Lil Classmate G','La Casa REC','AA00/475328','A',02,'AA00/475328','B',03);
+INSERT INTO EMISION VALUES ('Europa FM',to_date('20:03','HH24 : MI'),'HOT 3');
+INSERT INTO EMISION VALUES ('Los Santos FM',to_date('14/02/2017'),'LOVE SONGS');
+INSERT INTO EMISION VALUES ('Cadena 100',to_date('03/03/2010 15:24','DD/MM/YYYY HH24:MI'),'Classics');
+INSERT INTO EMISION VALUES ('Cadena 100',to_date('03/03/2010 15:24','DD/MM/YYYY HH24:MI'),'Classics');
+
+--HACIENDO LOS APARTADOS
+
+-- 3.1
+ALTER TABLE ESTUDIO ADD CHECK (pais IN ('España','Francia','Italia'));
+UPDATE ESTUDIO SET pais= 'Holanda' WHERE nombreEstudio = 'Interscope'; --no tiene que dejar ponerlo
+ALTER TABLE ESTUDIO DROP CONSTRAINT SYS_C007251;
+ALTER TABLE ESTUDIO ADD CONSTRAINT NoPuedesBro CHECK (pais IN ('España','Francia','Italia'));
+ALTER TABLE ESTUDIO DROP CONSTRAINT NOPUEDESBRO;
+
+-- 3.2
+ALTER TABLE RADIO ADD UNIQUE (web);
+INSERT INTO RADIO (nombre,web) VALUES ('South Europe','europafm.es');
+ALTER TABLE RADIO DISABLE UNIQUE (web); --SE DESHABILITA EN LUGHAR DE BORRARLA
+
+-- 3.3
+ALTER TABLE RADIO ADD fechaFundacion DATE DEFAULT '' NOT NULL;
+SELECT * FROM RADIO;
+
+-- 3.4
+ALTER TABLE TEMA MODIFY estudio VARCHAR2 (20);
+ 
+--4.1
+INSERT INTO EMISION (RADIO,fechaHora) VALUES ('Los Santos FM',to_date ('27/10/1987 22:21','DD/MM/YYYY HH24:MI'));
+UPDATE EMISION SET fechaHora  = fechaHora + INTERVAL '2' MINUTE WHERE fechaHora = to_date('27/10/1987 22:21','DD/MM/YYYY HH24:MI');
+SELECT to_char (fechaHora,'DD/MM HH24:MI') FROM EMISION;
+
+--4.2
+INSERT INTO VINILO VALUES ('AA00/475555','We the Best',to_date('01/11/2000','DD/MM/YYYY'),140,'QUEEN','PicsArt');
+INSERT INTO LP VALUES ('AA00/475555','TopTittle',19300);
+UPDATE LP SET copiasLanzamiento = 2 WHERE ISVN = (SELECT ISVN FROM VINILO WHERE grupo = 'QUEEN');
+
+SELECT GRUPO,copiasLanzamiento FROM VINILO,LP;
